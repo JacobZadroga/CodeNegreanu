@@ -11,37 +11,50 @@ public class PokerGUI {
     private static String[] players;
     private static int[] handNum;
     private static Deck deck = new Deck();
-    private static Font font = new Font(Font.SANS_SERIF, Font.BOLD, 16);
+    private static Font font = new Font(Font.SANS_SERIF, Font.BOLD, 24);
+    private static Font plfont = new Font(Font.SANS_SERIF, Font.BOLD, 140); //65-8
 
     public static void main(String[] args) {
         JFrame frame = new JFrame();
-        JPanel playerPanel = new JPanel();
-        JPanel placeHolder = new JPanel();
-        frame.setSize(1000, 800);
+        frame.setSize(1920, 1080);
         frame.setVisible(true);
+        frame.setLocationRelativeTo(null);
         //frame.setResizable(false);
         frame.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
+
+
         JPanel jp = new JPanel();
         jp.setLayout(new GridLayout(1,3));
 
+
+        JPanel playerPanel = new JPanel();
+        //playerPanel.setBackground(new Color(7, 117, 30));
+        JPanel flop = new JPanel();
+        //flop.setBackground(new Color(7, 117, 30));
         JPanel leftside = new JPanel();
+        //leftside.setBackground(new Color(7, 117, 30));
+
+
+
         leftside.setLayout(new GridLayout(8,2));
         JButton startNewGame = new JButton("New Game");
         startNewGame.setFont(font);
-        JButton refresh = new JButton("Refresh");
-        refresh.setFont(font);
+        JButton newGameRefresh = new JButton("Refresh");
+        newGameRefresh.setFont(font);
         leftside.add(startNewGame);
 
         for(int i = 0; i < 13; i++) {
             leftside.add(Box.createRigidArea(new Dimension(1, 1)));
         }
-        leftside.add(refresh);
+        leftside.add(newGameRefresh);
         leftside.add(Box.createRigidArea(new Dimension(1, 1)));
         jp.add(leftside);
 
+        JLabel[] playerLabels = new JLabel[8];
+
 
         jp.add(playerPanel);
-        jp.add(placeHolder);
+        jp.add(flop);
 
 
 
@@ -54,22 +67,31 @@ public class PokerGUI {
             public void actionPerformed(ActionEvent e) {
                 int confirm = JOptionPane.showConfirmDialog(null, "Start New Game?", "Choose", JOptionPane.YES_NO_OPTION);
                 if(confirm == 0) {
-                    getPlayerNames(frame, jp, refresh);
+                    getPlayerNames(frame, jp, newGameRefresh);
                 }
             }
         });
 
-        refresh.addActionListener(new ActionListener() {
+        newGameRefresh.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                for(String player : players) {
-                    System.out.println(player);
-                }
-                int notFolded = createPlayerPanel();
+
+                int notFolded = players.length;
+                deck.newDeal(notFolded);
+
+
                 playerPanel.removeAll();
                 playerPanel.setLayout(new GridLayout(notFolded, 1));
                 for(int i = 0; i < notFolded; i++) {
-                    playerPanel.add(new JLabel(players[i], SwingConstants.CENTER));
+                    playerLabels[i] = new JLabel("<html><body style=\"text-align:center;font-size:40px\">" + players[i] + "<br> 6D KC | 50.00%<body></html>", SwingConstants.CENTER);
+                    if(i % 2 == 0) {
+                        playerLabels[i].setBackground(Color.GRAY);
+                    } else {
+                        playerLabels[i].setBackground(new Color(173, 173, 173));
+                    }
+
+                    playerLabels[i].setOpaque(true);
+                    playerPanel.add(playerLabels[i]);
                 }
                 frame.repaint();
             }
@@ -84,6 +106,7 @@ public class PokerGUI {
     private static void getPlayerNames(JFrame orgFrame, JPanel orgPanel, JButton refresh) {
         JTextField[] names = new JTextField[8];
         orgFrame.remove(orgPanel);
+        orgFrame.setLocationRelativeTo(null);
         orgFrame.setSize(600,400);
         JPanel panel = new JPanel();
         panel.setLayout(new GridLayout(5,1));
@@ -112,7 +135,7 @@ public class PokerGUI {
                     }
                     newGame();
                     orgFrame.remove(panel);
-                    orgFrame.setSize(1000,800);
+                    orgFrame.setSize(1920, 1080);
                     orgFrame.add(orgPanel);
                     orgFrame.repaint();
                     refresh.doClick();

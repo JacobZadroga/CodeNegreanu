@@ -1,7 +1,10 @@
 package game;
 
+import javax.print.attribute.standard.JobMessageFromOperator;
 import javax.swing.*;
+import javax.swing.border.Border;
 import javax.swing.border.EmptyBorder;
+import javax.swing.border.LineBorder;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -19,42 +22,56 @@ public class PokerGUI {
         frame.setSize(1920, 1080);
         frame.setVisible(true);
         frame.setLocationRelativeTo(null);
+        //frame.setBackground(new Color(20, 157, 9));
         //frame.setResizable(false);
         frame.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 
 
         JPanel jp = new JPanel();
-        jp.setLayout(new GridLayout(1,3));
+        jp.setLayout(new BorderLayout());
 
 
         JPanel playerPanel = new JPanel();
-        //playerPanel.setBackground(new Color(7, 117, 30));
+        playerPanel.setBorder(new EmptyBorder(15,15,15,15));
         JPanel flop = new JPanel();
-        //flop.setBackground(new Color(7, 117, 30));
-        JPanel leftside = new JPanel();
+
         //leftside.setBackground(new Color(7, 117, 30));
 
+        //LEFT SIDE
+        JPanel leftside = new JPanel();
+        leftside.setLayout(new GridLayout(7,1));
+        leftside.setOpaque(false);
 
-
-        leftside.setLayout(new GridLayout(8,2));
         JButton startNewGame = new JButton("New Game");
         startNewGame.setFont(font);
         JButton newGameRefresh = new JButton("Refresh");
         newGameRefresh.setFont(font);
-        leftside.add(startNewGame);
+        JButton foldBtn = new JButton("Fold Player");
+        foldBtn.setFont(font);
+        JButton dealCard = new JButton("Deal Card");
+        dealCard.setFont(font);
 
-        for(int i = 0; i < 13; i++) {
-            leftside.add(Box.createRigidArea(new Dimension(1, 1)));
-        }
-        leftside.add(newGameRefresh);
+
+
+        leftside.add(startNewGame);
         leftside.add(Box.createRigidArea(new Dimension(1, 1)));
-        jp.add(leftside);
+        leftside.add(foldBtn);
+        leftside.add(Box.createRigidArea(new Dimension(1, 1)));
+        leftside.add(dealCard);
+        leftside.add(Box.createRigidArea(new Dimension(1, 1)));
+        leftside.add(newGameRefresh);
+
+
+        jp.add(leftside, BorderLayout.WEST);
 
         JLabel[] playerLabels = new JLabel[8];
 
+        flop.setLayout(new GridLayout(5, 1));
+        JLabel[] flopCards = new JLabel[5];
 
-        jp.add(playerPanel);
-        jp.add(flop);
+
+        jp.add(playerPanel,BorderLayout.CENTER);
+        jp.add(flop, BorderLayout.EAST);
 
 
 
@@ -82,14 +99,12 @@ public class PokerGUI {
 
                 playerPanel.removeAll();
                 playerPanel.setLayout(new GridLayout(notFolded, 1));
+                ((GridLayout)playerPanel.getLayout()).setVgap(15);
                 for(int i = 0; i < notFolded; i++) {
-                    playerLabels[i] = new JLabel("<html><body style=\"text-align:center;font-size:40px\">" + players[i] + "<br> 6D KC | 50.00%<body></html>", SwingConstants.CENTER);
-                    if(i % 2 == 0) {
-                        playerLabels[i].setBackground(Color.GRAY);
-                    } else {
-                        playerLabels[i].setBackground(new Color(173, 173, 173));
-                    }
 
+                    playerLabels[i] = new JLabel("<html><body style=\"text-align:center;font-size:40px\">" + players[i] + "<br> -- -- | -.-%<body></html>", SwingConstants.CENTER);
+                    playerLabels[i].setBackground(Color.GRAY);
+                    //playerLabels[i].setBorder(new LineBorder(Color.BLACK));
                     playerLabels[i].setOpaque(true);
                     playerPanel.add(playerLabels[i]);
                 }
@@ -97,11 +112,50 @@ public class PokerGUI {
             }
         });
 
+        foldBtn.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if(players == null || players.length <= 1) {
+                    return;
+                }
+                String[] remaining = new String[deck.remainingPlayers()];
+                int k = 0;
+                for(int i = 0; i < handNum.length; i++) {
+                    if(handNum[i] > -1) {
+                        remaining[k] = players[i];
+                        k++;
+                    }
+                }
+                String folded = (String) JOptionPane.showInputDialog(null, "Select Player to Fold", "Fold Menu", JOptionPane.PLAIN_MESSAGE, null, remaining, remaining[0]);
+                for(int i = 0; i < players.length; i++) {
+                    if(players[i] == folded) {
+                        deck.fold(handNum[i]);
+                        foldPlayer(handNum[i]);
+
+                        playerPanel.remove(playerLabels[i]);
+                        playerPanel.setLayout(new GridLayout(deck.remainingPlayers(),1));
+
+                        for(k = 0; k < players.length; k++) {
+                            if(handNum[k] > -1) {
+                                //playerPanel.add(playerLabels[k]);
+                            }
+                        }
+
+                        playerPanel.revalidate();
+                        playerPanel.repaint();
+                        frame.repaint();
+                        break;
+                    }
+                }
+            }
+        });
 
         frame.add(jp);
         frame.repaint();
         frame.revalidate();
     }
+
+
 
     private static void getPlayerNames(JFrame orgFrame, JPanel orgPanel, JButton refresh) {
         JTextField[] names = new JTextField[8];
@@ -178,17 +232,7 @@ public class PokerGUI {
     }
 
 
-    private static int createPlayerPanel() {
-        int notFolded = 0;
-        for(int i : handNum) {
-            if(i > -1) {
-                notFolded++;
-            }
-        }
-        return notFolded;
-    }
 
-    private static JLabel playerCards;
     private static void newGame() {
         handNum = new int[players.length];
         for(int i = 0; i < handNum.length; i++) {
@@ -196,10 +240,21 @@ public class PokerGUI {
         }
     }
 
-    private void foldPlayer(int p) {
+
+
+    private static void foldPlayer(int p) {
         handNum[p] = -1;
         for (int i = p + 1; i < handNum.length; i++) {
             handNum[i] = handNum[i] - 1;
         }
+    }
+
+    private static String getHandDetails(int plnum) {
+        String s = "asd";
+        return s;
+    }
+
+    private void resetHands() {
+
     }
 }

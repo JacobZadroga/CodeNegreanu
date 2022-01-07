@@ -87,6 +87,9 @@ public class Deck {
 
         int suit = (int) ((card) >> 21);
 
+        if(card == -1) {
+            return "--";
+        }
         switch(val) {
             case 1479181:
                 fnl += "2";
@@ -184,7 +187,9 @@ public class Deck {
         totalDelt = 0;
         playerhands = new ArrayList<int[]>();
         for(int i = 0; i < playersIn; i++) {
-            playerhands.add(new int[2]);
+            playerhands.add(new int[4]);
+            playerhands.get(i)[0] = -1;
+            playerhands.get(i)[1] = -1;
         }
         for(int i = 0; i < 5; i++) {
             communityCards[i] = -1;
@@ -213,6 +218,7 @@ public class Deck {
 
 
     private void possibleCards(int cardsRemaining, int start, int[] hand) {
+
         int a = 5 - cardsRemaining;
         if(cardsRemaining == 1) {
             for(int i = start; i < curdeck.size(); i++) {
@@ -242,10 +248,13 @@ public class Deck {
         //playersIn--;
     }
 
-
+    public int remainingPlayers() {
+        return playerhands.size();
+    }
     public void PercentageWins() {
+        possibleHands = new ArrayList<int[]>();
         possibleCards(5-(totalDelt - (2 * playersIn)), 0, communityCards);
-        hr.getPercentageWin(possibleHands, playerhands);
+        double[] wins = hr.getPercentageWin(possibleHands, playerhands);
     }
 
 

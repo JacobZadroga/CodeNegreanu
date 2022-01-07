@@ -50,27 +50,31 @@ public class HandRank {
 
 
     public double[] getPercentageWin(ArrayList<int[]> possibleHands, List<int[]> playerhands) {
+        //System.out.println("SIZE: " + possibleHands.size());
         int[] wins = new int[playerhands.size()];
         int[] cur = new int[playerhands.size()];
         for(int[] com : possibleHands) {
 
-            int[] best = {0, flushStrength(playerhands.get(0), com)};
-
-            for(int i = 1; i < playerhands.size(); i++) {
-                int tb = flushStrength(playerhands.get(i), com);
-                if(tb > best[1]) {
-                    best[0] = i;
-                    best[1] = tb;
+            int best = 0;
+            int[] stren = new int[playerhands.size()];
+            for(int i = 0; i < playerhands.size(); i++) {
+                stren[i] = flushStrength(playerhands.get(i), com);
+                if(stren[i] > best) {
+                    best = stren[i];
                 }
             }
-            if(best[1] > 0) {
-                wins[best[0]]++;
+
+            for(int i = 0; i < stren.length; i++) {
+                if(stren[i] == best && best > 0) {
+                    wins[i]++;
+                }
             }
 
         }
         double[] percent = new double[playerhands.size()];
         for(int win = 0; win < playerhands.size(); win++) {
-             percent[win] = wins[win] / (double)possibleHands.size();
+             //percent[win] = wins[win];
+             percent[win] = (wins[win] / (double)possibleHands.size()) * 100;
              System.out.println(percent[win]);
         }
         return percent;
@@ -93,8 +97,10 @@ public class HandRank {
             } else {
                 return flushStengthHash.get(hand[0]&2097151);
             }
-        } else {
+        } else if(hand[1]>>21 == type) {
             return flushStengthHash.get(hand[1]&2097151);
+        } else {
+            return flushStengthHash.get(Math.max(Math.max(Math.max(Math.max(community[0], community[1]), community[2]), community[3]), community[4])&2097151);
         }
     }
 }

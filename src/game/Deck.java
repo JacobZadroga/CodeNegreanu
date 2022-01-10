@@ -251,6 +251,7 @@ public class Deck {
     public int remainingPlayers() {
         return playerhands.size();
     }
+
     public void PercentageWins() {
         possibleHands = new ArrayList<int[]>();
         possibleCards(5-(totalDelt - (2 * playersIn)), 0, communityCards);

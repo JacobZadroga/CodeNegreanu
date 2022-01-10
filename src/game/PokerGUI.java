@@ -121,25 +121,24 @@ public class PokerGUI {
                 String[] remaining = new String[deck.remainingPlayers()];
                 int k = 0;
                 for(int i = 0; i < handNum.length; i++) {
+                    System.out.println(players[i] + " | " + handNum[i]);
                     if(handNum[i] > -1) {
                         remaining[k] = players[i];
+                        //System.out.println(players[i]);
                         k++;
                     }
                 }
+                System.out.println("----");
                 String folded = (String) JOptionPane.showInputDialog(null, "Select Player to Fold", "Fold Menu", JOptionPane.PLAIN_MESSAGE, null, remaining, remaining[0]);
+                System.out.println("Selected: " + folded);
                 for(int i = 0; i < players.length; i++) {
                     if(players[i] == folded) {
                         deck.fold(handNum[i]);
-                        foldPlayer(handNum[i]);
+                        foldPlayer(i);
 
                         playerPanel.remove(playerLabels[i]);
                         playerPanel.setLayout(new GridLayout(deck.remainingPlayers(),1));
-
-                        for(k = 0; k < players.length; k++) {
-                            if(handNum[k] > -1) {
-                                //playerPanel.add(playerLabels[k]);
-                            }
-                        }
+                        ((GridLayout)playerPanel.getLayout()).setVgap(15);
 
                         playerPanel.revalidate();
                         playerPanel.repaint();
@@ -245,7 +244,9 @@ public class PokerGUI {
     private static void foldPlayer(int p) {
         handNum[p] = -1;
         for (int i = p + 1; i < handNum.length; i++) {
-            handNum[i] = handNum[i] - 1;
+            if(handNum[i] > -1) {
+                handNum[i] = handNum[i] - 1;
+            }
         }
     }
 

@@ -8,6 +8,7 @@ import javax.swing.border.LineBorder;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.HashMap;
 import java.util.jar.JarEntry;
 
 public class PokerGUI {
@@ -16,8 +17,11 @@ public class PokerGUI {
     private static Deck deck = new Deck();
     private static Font font = new Font(Font.SANS_SERIF, Font.BOLD, 24);
     private static Font plfont = new Font(Font.SANS_SERIF, Font.BOLD, 140); //65-8
+    private static HashMap<String, Integer> dealmap = new HashMap<String, Integer>();
 
     public static void main(String[] args) {
+        setUpHashMap();
+
         JFrame frame = new JFrame();
         frame.setSize(1920, 1080);
         frame.setVisible(true);
@@ -121,16 +125,16 @@ public class PokerGUI {
                 String[] remaining = new String[deck.remainingPlayers()];
                 int k = 0;
                 for(int i = 0; i < handNum.length; i++) {
-                    System.out.println(players[i] + " | " + handNum[i]);
+                    //System.out.println(players[i] + " | " + handNum[i]);
                     if(handNum[i] > -1) {
                         remaining[k] = players[i];
                         //System.out.println(players[i]);
                         k++;
                     }
                 }
-                System.out.println("----");
+                //System.out.println("----");
                 String folded = (String) JOptionPane.showInputDialog(null, "Select Player to Fold", "Fold Menu", JOptionPane.PLAIN_MESSAGE, null, remaining, remaining[0]);
-                System.out.println("Selected: " + folded);
+                //System.out.println("Selected: " + folded);
                 for(int i = 0; i < players.length; i++) {
                     if(players[i] == folded) {
                         deck.fold(handNum[i]);
@@ -144,6 +148,22 @@ public class PokerGUI {
                         playerPanel.repaint();
                         frame.repaint();
                         break;
+                    }
+                }
+            }
+        });
+
+        dealCard.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                String cards = (String) JOptionPane.showInputDialog(null, "Type Cards to Deal", "Card Deal", JOptionPane.PLAIN_MESSAGE, null, null, "");
+                if(cards.indexOf(",") != -1) {
+
+                } else {
+                    if(dealmap.get(cards) != null) {
+
+                    } else {
+                        JOptionPane.showConfirmDialog(null, "Not a valid card", "Invalid", JOptionPane.PLAIN_MESSAGE);
                     }
                 }
             }
@@ -257,5 +277,63 @@ public class PokerGUI {
 
     private void resetHands() {
 
+    }
+
+    private static void setUpHashMap() {
+        dealmap.put("as", 0);
+        dealmap.put("ks", 1);
+        dealmap.put("qs", 5);
+        dealmap.put("js", 22);
+        dealmap.put("ts", 98);
+        dealmap.put("9s", 453);
+        dealmap.put("8s", 2031);
+        dealmap.put("7s", 8698);
+        dealmap.put("6s", 22854);
+        dealmap.put("5s", 83661);
+        dealmap.put("4s", 262349);
+        dealmap.put("3s", 636345);
+        dealmap.put("2s", 1479181);
+
+        dealmap.put("ah", 2097152);
+        dealmap.put("kh", 2097153);
+        dealmap.put("qh", 2097157);
+        dealmap.put("jh", 2097174);
+        dealmap.put("th", 2097250);
+        dealmap.put("9h", 2097605);
+        dealmap.put("8h", 2099183);
+        dealmap.put("7h", 2105850);
+        dealmap.put("6h", 2120006);
+        dealmap.put("5h", 2180813);
+        dealmap.put("4h", 2359501);
+        dealmap.put("3h", 2733497);
+        dealmap.put("2h", 3576333);
+
+        dealmap.put("ac", 16777216);
+        dealmap.put("kc", 16777217);
+        dealmap.put("qc", 16777221);
+        dealmap.put("jc", 16777238);
+        dealmap.put("tc", 16777314);
+        dealmap.put("9c", 16777669);
+        dealmap.put("8c", 16779247);
+        dealmap.put("7c", 16785914);
+        dealmap.put("6c", 16800070);
+        dealmap.put("5c", 16860877);
+        dealmap.put("4c", 17039565);
+        dealmap.put("3c", 17413561);
+        dealmap.put("2c", 18256397);
+
+        dealmap.put("ad", 119537664);
+        dealmap.put("kd", 119537665);
+        dealmap.put("qd", 119537669);
+        dealmap.put("jd", 119537686);
+        dealmap.put("td", 119537762);
+        dealmap.put("9d", 119538117);
+        dealmap.put("8d", 119539695);
+        dealmap.put("7d", 119546362);
+        dealmap.put("6d", 119560518);
+        dealmap.put("5d", 119621325);
+        dealmap.put("4d", 119800013);
+        dealmap.put("3d", 120174009);
+        dealmap.put("2d", 121016845);
     }
 }

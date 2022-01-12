@@ -1,9 +1,8 @@
 package game;
 
 import game.HandRank;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class Deck {
@@ -44,8 +43,10 @@ public class Deck {
     private ArrayList<int[]> possibleHands = new ArrayList<int[]>();
     private HandRank hr = new HandRank();
 
+
     //constructor to initialize the Deck
     public Deck() {
+
 
         int[] suits = {
                 0b0,
@@ -54,19 +55,19 @@ public class Deck {
                 0b111001
         };
         int[] vals = {
-                0b0,
-                0b1,
-                0b101,
-                0b10110,
-                0b1100010,
-                0b111000101,
-                0b11111101111,
-                0b10000111111010,
-                0b101100101000110,
-                0b10100011011001101,
-                0b1000000000011001101,
-                0b10011011010110111001,
-                0b101101001001000001101
+                0b0, //A
+                0b1, //K
+                0b101, //Q
+                0b10110, //J
+                0b1100010, //10
+                0b111000101, //9
+                0b11111101111, //8
+                0b10000111111010, //7
+                0b101100101000110, //6
+                0b10100011011001101, //5
+                0b1000000000011001101, //4
+                0b10011011010110111001, //3
+                0b101101001001000001101 //2
         };
         int index = 0;
         for(int s : suits) {

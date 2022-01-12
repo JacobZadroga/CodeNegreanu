@@ -82,25 +82,40 @@ public class HandRank {
 
     //if hand is flush return the flush type
     public int flushStrength(int[] hand, int[] community) {
-        int sum = 0;
+        int sum = 0, comsum = 0;
         for(int i : hand) {
             sum += (i >> 21);
         }
         for(int i : community) {
-            sum += (i >> 21);
+            int g = (i >> 21);
+            comsum += g;
+            sum += g;
         }
         int type = flushHash.get(sum);
-        if(type == -1) return 0;
+        boolean communityFlush;
+        int strength;
+        if(type == -1) {
+            return 0;
+        } else {
+            communityFlush = flushHash.get(comsum) != -1;
+        }
         if((hand[0]>>21) == type) {
             if((hand[1]>>21) == type) {
-                return flushStengthHash.get(Math.min(hand[0], hand[1])&2097151);
+                strength = Math.min(hand[0], hand[1]);
             } else {
-                return flushStengthHash.get(hand[0]&2097151);
+                strength = hand[0];
             }
         } else if(hand[1]>>21 == type) {
-            return flushStengthHash.get(hand[1]&2097151);
+            strength = hand[1];
         } else {
+            // bug where a community flush doesn't take into account if your own hand has worse cards and therefore just uses community cards
             return flushStengthHash.get(Math.max(Math.max(Math.max(Math.max(community[0], community[1]), community[2]), community[3]), community[4])&2097151);
+        }
+        if(!communityFlush) {
+            return flushStengthHash.get(strength&2097151);
+        } else {
+            int g = Math.max(Math.max(Math.max(Math.max(community[0], community[1]), community[2]), community[3]), community[4]);
+            return flushStengthHash.get(Math.min(g, strength)&2097151);
         }
     }
 }

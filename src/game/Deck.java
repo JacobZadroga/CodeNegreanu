@@ -259,6 +259,10 @@ public class Deck {
         double[] wins = hr.getPercentageWin(possibleHands, playerhands);
     }
 
+    public int getTotalDelt() {
+        return totalDelt;
+    }
+
 
     //write possible hands depr method
         /*public void writePossibleHands() {

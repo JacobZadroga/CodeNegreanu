@@ -161,7 +161,14 @@ public class PokerGUI {
 
                 } else {
                     if(dealmap.get(cards) != null) {
+                        deck.dealNextCard(dealmap.get(cards));
+                        int i = deck.getTotalDelt();
+                        if(i <= players.length*2) {
+                            i = ;
+                            System.out.println(i);
+                        } else {
 
+                        }
                     } else {
                         JOptionPane.showConfirmDialog(null, "Not a valid card", "Invalid", JOptionPane.PLAIN_MESSAGE);
                     }

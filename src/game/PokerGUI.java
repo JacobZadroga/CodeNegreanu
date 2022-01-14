@@ -71,7 +71,12 @@ public class PokerGUI {
         JLabel[] playerLabels = new JLabel[8];
 
         flop.setLayout(new GridLayout(5, 1));
+        flop.setBorder(new EmptyBorder(0,75,0,75));
         JLabel[] flopCards = new JLabel[5];
+        for(int i = 0; i < 5; i++) {
+            flopCards[i] = new JLabel("<html><span style=\"font-size:40px\">" + "--" + "</span></html>");
+            flop.add(flopCards[i]);
+        }
 
 
         jp.add(playerPanel,BorderLayout.CENTER);
@@ -156,19 +161,33 @@ public class PokerGUI {
         dealCard.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                String cards = (String) JOptionPane.showInputDialog(null, "Type Cards to Deal", "Card Deal", JOptionPane.PLAIN_MESSAGE, null, null, "");
-                if(cards.indexOf(",") != -1) {
+                String card = (String) JOptionPane.showInputDialog(null, "Type Cards to Deal", "Card Deal", JOptionPane.PLAIN_MESSAGE, null, null, "");
+                if(card.indexOf(",") != -1) {
+                    String[] cards = card.split(",");
+                    for(String c : cards) {
+                        if(dealmap.get(c) != null) {
+                            boolean dealt = deck.dealNextCard(dealmap.get(c));
+                            if(dealt) {
+                                dealCards(playerLabels, frame);
+                            } else {
+                                JOptionPane.showConfirmDialog(null, "Card Already Dealt", "Invalid", JOptionPane.PLAIN_MESSAGE);
+                                break;
+                            }
 
-                } else {
-                    if(dealmap.get(cards) != null) {
-                        deck.dealNextCard(dealmap.get(cards));
-                        int i = deck.getTotalDelt();
-                        if(i <= players.length*2) {
-                            i = ;
-                            System.out.println(i);
                         } else {
-
+                            JOptionPane.showConfirmDialog(null, "Not a valid card", "Invalid", JOptionPane.PLAIN_MESSAGE);
+                            break;
                         }
+                    }
+                } else {
+                    if(dealmap.get(card) != null) {
+                        boolean dealt = deck.dealNextCard(dealmap.get(card));
+                        if(dealt) {
+                            dealCards(playerLabels, frame);
+                        } else {
+                            JOptionPane.showConfirmDialog(null, "Card Already Dealt", "Invalid", JOptionPane.PLAIN_MESSAGE);
+                        }
+
                     } else {
                         JOptionPane.showConfirmDialog(null, "Not a valid card", "Invalid", JOptionPane.PLAIN_MESSAGE);
                     }
@@ -181,6 +200,25 @@ public class PokerGUI {
         frame.revalidate();
     }
 
+    private static void dealCards(JLabel[] playerLabels, JFrame frame) {
+        int i = deck.getTotalDelt();
+        if(i <= players.length*2) {
+            i = (i-1)%players.length;
+            System.out.println(i);
+            playerLabels[i].setText(getHandDetails(i));
+            if(i == players.length*2) {
+                //calculate odds
+            }
+            frame.revalidate();
+            frame.repaint();
+        } else {
+            boolean calcOdds = i - (players.length*2) >= 3;
+            i = i - (players.length*2);
+            if(calcOdds) {
+
+            }
+        }
+    }
 
 
     private static void getPlayerNames(JFrame orgFrame, JPanel orgPanel, JButton refresh) {
@@ -278,8 +316,12 @@ public class PokerGUI {
     }
 
     private static String getHandDetails(int plnum) {
-        String s = "asd";
-        return s;
+        return "<html><body style=\"text-align:center;font-size:40px\">" + players[plnum] + "<br> " + deck.getPlayerCards(plnum) + " | -.-%<body></html>";
+    }
+
+    private static String getHandOdds(int plnum) {
+        //return "<html><body style=\"text-align:center;font-size:40px\">" + players[plnum] + "<br> " + deck.getPlayerCards(plnum) + " | " + deck. +"%<body></html>";
+        return "ss";
     }
 
     private void resetHands() {

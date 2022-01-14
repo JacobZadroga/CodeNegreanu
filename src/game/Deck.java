@@ -136,16 +136,16 @@ public class Deck {
 
         switch(suit) {
             case 0:
-                fnl += "♠";
+                fnl = "<span style=\"color:black\">" + fnl + "♠" + "</span>";
                 break;
             case 1:
-                fnl += "♥";
+                fnl = "<span style=\"color:red\">" + fnl + "♥" + "</span>";
                 break;
             case 8:
-                fnl += "♣";
+                fnl = "<span style=\"color:black\">" + fnl + "♣" + "</span>";
                 break;
             case 57:
-                fnl += "♦";
+                fnl = "<span style=\"color:red\">" + fnl + "♦" + "</span>";
                 break;
         }
 
@@ -158,7 +158,7 @@ public class Deck {
         if(playNum-1 > playerhands.size()) {
             return "Invalid Player.";
         }
-        int[] player = playerhands.get(playNum-1);
+        int[] player = playerhands.get(playNum);
         return getCardDetails(player[0]) + ", " + getCardDetails(player[1]);
 
     }
@@ -197,24 +197,23 @@ public class Deck {
         }
     }
 
-    public String dealNextCard(int card) {
+    public boolean dealNextCard(int card) {
 
         String fnl;
-        if(totalDelt >= (2 * playersIn) + 5) {
-            fnl = "Invalid dealing.";
+        if((totalDelt >= (2 * playersIn) + 5) || curdeck.indexOf((Integer) card) == -1) {
+            return false;
         } else if(totalDelt >= (2 * playersIn)) {
             int comNum = totalDelt - (2 * playersIn);
             communityCards[comNum] = card;
             curdeck.remove((Integer) card);
-            fnl = "Dealing " + getCardDetails(card) + " to Community Cards";
             totalDelt++;
+            return true;
         } else {
             playerhands.get(totalDelt%playersIn)[totalDelt/playersIn] = card;
             curdeck.remove((Integer) card);
-            fnl = "Delt " + getCardDetails(card) + " to player " + (totalDelt%playersIn);
             totalDelt++;
+            return true;
         }
-        return fnl+"\n";
     }
 
 
@@ -253,10 +252,10 @@ public class Deck {
         return playerhands.size();
     }
 
-    public void PercentageWins() {
+    public double[] PercentageWins() {
         possibleHands = new ArrayList<int[]>();
         possibleCards(5-(totalDelt - (2 * playersIn)), 0, communityCards);
-        double[] wins = hr.getPercentageWin(possibleHands, playerhands);
+        return hr.getPercentageWin(possibleHands, playerhands);
     }
 
     public int getTotalDelt() {

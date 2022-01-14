@@ -1,23 +1,18 @@
 package game;
 
-import javax.print.attribute.standard.JobMessageFromOperator;
 import javax.swing.*;
-import javax.swing.border.Border;
 import javax.swing.border.EmptyBorder;
-import javax.swing.border.LineBorder;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.HashMap;
-import java.util.jar.JarEntry;
 
 public class PokerGUI {
     private static String[] players;
     private static int[] handNum;
-    private static Deck deck = new Deck();
-    private static Font font = new Font(Font.SANS_SERIF, Font.BOLD, 24);
-    private static Font plfont = new Font(Font.SANS_SERIF, Font.BOLD, 140); //65-8
-    private static HashMap<String, Integer> dealmap = new HashMap<String, Integer>();
+    private static final Deck deck = new Deck();
+    private static final Font font = new Font(Font.SANS_SERIF, Font.BOLD, 24);
+    private static final HashMap<String, Integer> dealmap = new HashMap<String, Integer>();
 
     public static void main(String[] args) {
         setUpHashMap();

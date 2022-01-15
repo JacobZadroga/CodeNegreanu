@@ -13,12 +13,13 @@ public class PokerGUI {
     private static final Deck deck = new Deck();
     private static final Font font = new Font(Font.SANS_SERIF, Font.BOLD, 24);
     private static final HashMap<String, Integer> dealmap = new HashMap<String, Integer>();
+    private static final Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
 
     public static void main(String[] args) {
         setUpHashMap();
 
         JFrame frame = new JFrame();
-        frame.setSize(1920, 1080);
+        frame.setSize((int)screenSize.getWidth(), (int)screenSize.getHeight());
         frame.setVisible(true);
         frame.setLocationRelativeTo(null);
         //frame.setBackground(new Color(20, 157, 9));
@@ -89,6 +90,7 @@ public class PokerGUI {
                 int confirm = JOptionPane.showConfirmDialog(null, "Start New Game?", "Choose", JOptionPane.YES_NO_OPTION);
                 if(confirm == 0) {
                     getPlayerNames(frame, jp, newGameRefresh);
+
                 }
             }
         });
@@ -99,8 +101,6 @@ public class PokerGUI {
 
                 int notFolded = players.length;
                 deck.newDeal(notFolded);
-
-
                 playerPanel.removeAll();
                 playerPanel.setLayout(new GridLayout(notFolded, 1));
                 ((GridLayout)playerPanel.getLayout()).setVgap(15);
@@ -112,7 +112,11 @@ public class PokerGUI {
                     playerLabels[i].setOpaque(true);
                     playerPanel.add(playerLabels[i]);
                 }
+                for(int i = 0; i < 5; i++) {
+                    flopCards[i].setText("<html><body style=\"font-size:40px\">" + deck.getCommunityCard(i) + "</body></html>");
+                }
                 frame.repaint();
+                frame.revalidate();
             }
         });
 
@@ -163,7 +167,7 @@ public class PokerGUI {
                         if(dealmap.get(c) != null) {
                             boolean dealt = deck.dealNextCard(dealmap.get(c));
                             if(dealt) {
-                                dealCards(playerLabels, frame);
+                                dealCards(playerLabels, flopCards, frame);
                             } else {
                                 JOptionPane.showConfirmDialog(null, "Card Already Dealt", "Invalid", JOptionPane.PLAIN_MESSAGE);
                                 break;
@@ -178,7 +182,7 @@ public class PokerGUI {
                     if(dealmap.get(card) != null) {
                         boolean dealt = deck.dealNextCard(dealmap.get(card));
                         if(dealt) {
-                            dealCards(playerLabels, frame);
+                            dealCards(playerLabels, flopCards, frame);
                         } else {
                             JOptionPane.showConfirmDialog(null, "Card Already Dealt", "Invalid", JOptionPane.PLAIN_MESSAGE);
                         }
@@ -195,24 +199,26 @@ public class PokerGUI {
         frame.revalidate();
     }
 
-    private static void dealCards(JLabel[] playerLabels, JFrame frame) {
+    private static void dealCards(JLabel[] playerLabels, JLabel[] flopCards, JFrame frame) {
         int i = deck.getTotalDelt();
         if(i <= players.length*2) {
             i = (i-1)%players.length;
-            System.out.println(i);
+            //System.out.println(i);
             playerLabels[i].setText(getHandDetails(i));
             if(i == players.length*2) {
                 //calculate odds
             }
-            frame.revalidate();
-            frame.repaint();
+
         } else {
             boolean calcOdds = i - (players.length*2) >= 3;
             i = i - (players.length*2);
+            flopCards[i-1].setText("<html><body style=\"font-size:40px\">" + deck.getCommunityCard(i-1) + "</body></html>");
             if(calcOdds) {
 
             }
         }
+        frame.revalidate();
+        frame.repaint();
     }
 
 
@@ -248,7 +254,7 @@ public class PokerGUI {
                     }
                     newGame();
                     orgFrame.remove(panel);
-                    orgFrame.setSize(1920, 1080);
+                    orgFrame.setSize((int)screenSize.getWidth(), (int)screenSize.getHeight());
                     orgFrame.add(orgPanel);
                     orgFrame.repaint();
                     refresh.doClick();

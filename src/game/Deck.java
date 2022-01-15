@@ -169,13 +169,8 @@ public class Deck {
     }
 
     //get the community cards
-    public String getCommunityCards() {
-        String fnl = "| ";
-        for(int i = 0; i < 5; i++) {
-            if(communityCards[i] == -1) break;
-            fnl += getCardDetails(communityCards[i]) + " | ";
-        }
-        return fnl;
+    public String getCommunityCard(int i) {
+        return getCardDetails(communityCards[i]);
     }
 
     private void resetDeck() {
@@ -220,6 +215,9 @@ public class Deck {
     private void possibleCards(int cardsRemaining, int start, int[] hand) {
 
         int a = 5 - cardsRemaining;
+        if(cardsRemaining==0) {
+            possibleHands.add(communityCards);
+        }
         if(cardsRemaining == 1) {
             for(int i = start; i < curdeck.size(); i++) {
                 hand[a] = curdeck.get(i);

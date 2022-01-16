@@ -49,10 +49,10 @@ public class Deck {
 
 
         int[] suits = {
-                0b0,
-                0b1,
-                0b1000,
-                0b111001
+                0b0, //Spades
+                0b1, //Hearts
+                0b1000, //Clubs
+                0b111001 //Diamonds
         };
         int[] vals = {
                 0b0, //A
@@ -192,22 +192,24 @@ public class Deck {
         }
     }
 
-    public boolean dealNextCard(int card) {
+    public int dealNextCard(int card) {
 
         String fnl;
-        if((totalDelt >= (2 * playersIn) + 5) || curdeck.indexOf((Integer) card) == -1) {
-            return false;
+        if((totalDelt >= (2 * playersIn) + 5)) {
+            return 0;
+        } else if(curdeck.indexOf((Integer) card) == -1) {
+            return -1;
         } else if(totalDelt >= (2 * playersIn)) {
             int comNum = totalDelt - (2 * playersIn);
             communityCards[comNum] = card;
             curdeck.remove((Integer) card);
             totalDelt++;
-            return true;
+            return 1;
         } else {
             playerhands.get(totalDelt%playersIn)[totalDelt/playersIn] = card;
             curdeck.remove((Integer) card);
             totalDelt++;
-            return true;
+            return 1;
         }
     }
 

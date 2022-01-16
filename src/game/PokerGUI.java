@@ -165,12 +165,21 @@ public class PokerGUI {
                     String[] cards = card.split(",");
                     for(String c : cards) {
                         if(dealmap.get(c) != null) {
-                            boolean dealt = deck.dealNextCard(dealmap.get(c));
-                            if(dealt) {
+                            int dealt = deck.dealNextCard(dealmap.get(c));
+                            if(dealt == 1) {
                                 dealCards(playerLabels, flopCards, frame);
-                            } else {
+                            } else if(dealt == -1) {
                                 JOptionPane.showConfirmDialog(null, "Card Already Dealt", "Invalid", JOptionPane.PLAIN_MESSAGE);
                                 break;
+                            } else {
+                                 String firstname = players[0];
+                                 for(int i = 1; i < players.length; i++) {
+                                        players[i-1] = players[i];
+                                 }
+                                 players[players.length-1] = firstname;
+                                 newGameRefresh.doClick();
+                                 dealt = deck.dealNextCard(dealmap.get(c));
+                                 dealCards(playerLabels, flopCards, frame);
                             }
 
                         } else {
@@ -180,11 +189,20 @@ public class PokerGUI {
                     }
                 } else {
                     if(dealmap.get(card) != null) {
-                        boolean dealt = deck.dealNextCard(dealmap.get(card));
-                        if(dealt) {
+                        int dealt = deck.dealNextCard(dealmap.get(card));
+                        if(dealt == 1) {
                             dealCards(playerLabels, flopCards, frame);
-                        } else {
+                        } else if(dealt == -1) {
                             JOptionPane.showConfirmDialog(null, "Card Already Dealt", "Invalid", JOptionPane.PLAIN_MESSAGE);
+                        } else {
+                            String firstname = players[0];
+                            for(int i = 1; i < players.length; i++) {
+                                players[i-1] = players[i];
+                            }
+                            players[players.length-1] = firstname;
+                            newGameRefresh.doClick();
+                            dealt = deck.dealNextCard(dealmap.get(card));
+                            dealCards(playerLabels, flopCards, frame);
                         }
 
                     } else {

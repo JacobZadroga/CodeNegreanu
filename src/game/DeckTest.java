@@ -29,13 +29,12 @@ public class DeckTest {
 //        d.fold(1);
 //        d.PercentageWins();
           HandRank hr = new HandRank();
-          int[] a = new int[] {
-                  1,7,2,6,8,23,6
-          };
-          mergeSort(a, a.length);
-          for(int i : a) {
-              System.out.println(i);
-          }
+          int i = hr.straightFlushStrength(new int[] {
+                  0b111000101, 1
+          }, new int[] {
+                  0b10100011011001101, 0b11111101111, 0b101, 0b10110, 0b1100010
+          }, 0);
+          System.out.println(i);
 
     }
 

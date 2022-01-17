@@ -8,6 +8,7 @@ import java.util.Locale;
 
 public class HandRank {
     HashMap<Integer, Integer> flushHash = new HashMap<Integer, Integer>();
+    HashMap<Integer, Integer> handHash = new HashMap<Integer, Integer>();
     HashMap<Integer, Integer> flushStengthHash = new HashMap<Integer, Integer>();
     HashMap<Integer, Integer> straightflushStengthHash = new HashMap<Integer, Integer>();
 
@@ -31,6 +32,8 @@ public class HandRank {
                 String[] keyPair = ln.split(",");
                 flushHash.put((Integer) Integer.parseInt(keyPair[0]), (Integer) Integer.parseInt(keyPair[1]));
             }
+
+
             //System.out.println(str);
             flushStengthHash.put(0, 113);
             flushStengthHash.put(1, 112);
@@ -82,20 +85,24 @@ public class HandRank {
                     int g = (k >> 21);
                     comsum += g;
                     sum += g;
-                    valsum += k&2097151;
+                    valsum += k & 2097151;
                 }
+
                 int flushStren = flushStrength(playerhands.get(i), com, sum, comsum);
                 int handStren = 0;
                 if(flushStren >= 0) {
                     if(handStren >= 6 && handStren <= 53) {
-
+                        int k = straightFlushStrength(playerhands.get(i), com, flushStren>>16);
+                        if(k != 0) {
+                            stren[i] = k;
+                        }
                     } else {
-                        stren[i] = Math.max(flushStren, handStren);
+                        stren[i] = Math.min(flushStren, handStren);
                     }
                 }
                 stren[i] = handStren;
 
-                if(stren[i] > best) {
+                if(stren[i] < best) {
                     best = stren[i];
                 }
             }
@@ -144,8 +151,29 @@ public class HandRank {
         }
     }
 
-    public int straightFlushStrength(int[] hand, int[] community, int flushtype, int straighthigh) {
-        return 1;
+    public int straightFlushStrength(int[] hand, int[] community, int flushtype) {
+        int[] cards = new int[] {
+                hand[0], hand[1], community[0], community[1], community[2], community[3], community[4]
+        };
+        mergeSort(cards, 7);
+        int inarow = 0;
+
+        int prev = straightflushStengthHash.get(cards[0]&2097151);
+        for(int i = 0; i < cards.length; i++) {
+            if((straightflushStengthHash.get(cards[i]&2097151) == prev-1 || inarow == 0) && cards[i] >> 21 == flushtype) {
+                inarow++;
+            } else if(inarow >= 5) {
+                break;
+            } else {
+                inarow = 1;
+            }
+            prev = straightflushStengthHash.get(cards[i]&2097151);
+        }
+        if(inarow >= 5) {
+            return prev+(inarow-1);
+        } else {
+            return 0;
+        }
     }
 
     public void mergeSort(int[] lst, int n) {

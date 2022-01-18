@@ -4,7 +4,6 @@ import java.io.FileReader;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Locale;
 
 public class HandRank {
     HashMap<Integer, Integer> flushHash = new HashMap<Integer, Integer>();
@@ -19,7 +18,8 @@ public class HandRank {
 
     private void loadFlushHand() {
         try {
-            FileReader fp = new FileReader("flushrank.txt");
+
+            FileReader fp = new FileReader("/Users/jacobzadroga/flushrank.txt");
             String str = "";
             char[] line = new char[20];
             int rcv;
@@ -33,7 +33,7 @@ public class HandRank {
                 flushHash.put((Integer) Integer.parseInt(keyPair[0]), (Integer) Integer.parseInt(keyPair[1]));
             }
             fp.close();
-            fp = new FileReader("handrank.txt");
+            fp = new FileReader("/Users/jacobzadroga/handrank.txt");
             str = "";
             line = new char[20];
             while((rcv = fp.read(line)) == 20) {

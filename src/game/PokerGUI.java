@@ -19,6 +19,7 @@ public class PokerGUI implements KeyListener {
     private JFrame frame;
     private JPanel playerPanel;
     private JLabel[] playerLabels;
+    private JLabel[] flopCards;
 
 
     public PokerGUI() {
@@ -78,7 +79,7 @@ public class PokerGUI implements KeyListener {
 
         flop.setLayout(new GridLayout(5, 1));
         flop.setBorder(new EmptyBorder(0,75,0,75));
-        JLabel[] flopCards = new JLabel[5];
+        flopCards = new JLabel[5];
         for(int i = 0; i < 5; i++) {
             flopCards[i] = new JLabel("<html><span style=\"font-size:40px\">" + "--" + "</span></html>");
             flop.add(flopCards[i]);
@@ -228,6 +229,24 @@ public class PokerGUI implements KeyListener {
         frame.add(jp);
         frame.repaint();
         frame.revalidate();
+    }
+
+    private void rcvDealCard(int c, JButton newGameRefresh) {
+        int dealt = deck.dealNextCard(c);
+        if(dealt == 1) {
+            dealCards(playerLabels, flopCards, frame);
+        } else if(dealt == -1) {
+            JOptionPane.showConfirmDialog(null, "Card Already Dealt", "Invalid", JOptionPane.PLAIN_MESSAGE);
+        } else {
+            String firstname = players[0];
+            for(int i = 1; i < players.length; i++) {
+                players[i-1] = players[i];
+            }
+            players[players.length-1] = firstname;
+            newGameRefresh.doClick();
+            dealt = deck.dealNextCard(c);
+            dealCards(playerLabels, flopCards, frame);
+        }
     }
 
     private void dealCards(JLabel[] playerLabels, JLabel[] flopCards, JFrame frame) {

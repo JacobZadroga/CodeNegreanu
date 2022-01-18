@@ -215,10 +215,10 @@ public class Deck {
 
 
     private void possibleCards(int cardsRemaining, int start, int[] hand) {
-
         int a = 5 - cardsRemaining;
         if(cardsRemaining==0) {
             possibleHands.add(communityCards);
+            return;
         }
         if(cardsRemaining == 1) {
             for(int i = start; i < curdeck.size(); i++) {

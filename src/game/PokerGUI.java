@@ -5,20 +5,26 @@ import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.util.HashMap;
 
-public class PokerGUI {
-    private static String[] players;
-    private static int[] handNum;
-    private static final Deck deck = new Deck();
-    private static final Font font = new Font(Font.SANS_SERIF, Font.BOLD, 24);
-    private static final HashMap<String, Integer> dealmap = new HashMap<String, Integer>();
-    private static final Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+public class PokerGUI implements KeyListener {
+    private String[] players;
+    private int[] handNum;
+    private final Deck deck = new Deck();
+    private final Font font = new Font(Font.SANS_SERIF, Font.BOLD, 24);
+    private final HashMap<String, Integer> dealmap = new HashMap<String, Integer>();
+    private final Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+    private JFrame frame;
+    private JPanel playerPanel;
+    private JLabel[] playerLabels;
 
-    public static void main(String[] args) {
+
+    public PokerGUI() {
         setUpHashMap();
 
-        JFrame frame = new JFrame();
+        frame = new JFrame();
         frame.setSize((int)screenSize.getWidth(), (int)screenSize.getHeight());
         frame.setVisible(true);
         frame.setLocationRelativeTo(null);
@@ -31,7 +37,7 @@ public class PokerGUI {
         jp.setLayout(new BorderLayout());
 
 
-        JPanel playerPanel = new JPanel();
+        playerPanel = new JPanel();
         playerPanel.setBorder(new EmptyBorder(15,15,15,15));
         JPanel flop = new JPanel();
 
@@ -44,12 +50,16 @@ public class PokerGUI {
 
         JButton startNewGame = new JButton("New Game");
         startNewGame.setFont(font);
+        startNewGame.setFocusable(false);
         JButton newGameRefresh = new JButton("Refresh");
         newGameRefresh.setFont(font);
+        newGameRefresh.setFocusable(false);
         JButton foldBtn = new JButton("Fold Player");
         foldBtn.setFont(font);
+        foldBtn.setFocusable(false);
         JButton dealCard = new JButton("Deal Card");
         dealCard.setFont(font);
+        dealCard.setFocusable(false);
 
 
 
@@ -64,7 +74,7 @@ public class PokerGUI {
 
         jp.add(leftside, BorderLayout.WEST);
 
-        JLabel[] playerLabels = new JLabel[8];
+        playerLabels = new JLabel[8];
 
         flop.setLayout(new GridLayout(5, 1));
         flop.setBorder(new EmptyBorder(0,75,0,75));
@@ -161,6 +171,7 @@ public class PokerGUI {
             @Override
             public void actionPerformed(ActionEvent e) {
                 String card = (String) JOptionPane.showInputDialog(null, "Type Cards to Deal", "Card Deal", JOptionPane.PLAIN_MESSAGE, null, null, "");
+                if(card == null) return;
                 if(card.indexOf(",") != -1) {
                     String[] cards = card.split(",");
                     for(String c : cards) {
@@ -212,19 +223,21 @@ public class PokerGUI {
             }
         });
 
+        frame.addKeyListener(this);
+        frame.setFocusable(true);
         frame.add(jp);
         frame.repaint();
         frame.revalidate();
     }
 
-    private static void dealCards(JLabel[] playerLabels, JLabel[] flopCards, JFrame frame) {
+    private void dealCards(JLabel[] playerLabels, JLabel[] flopCards, JFrame frame) {
         int i = deck.getTotalDelt();
         if(i <= players.length*2) {
             i = (i-1)%players.length;
             //System.out.println(i);
             playerLabels[i].setText(getHandDetails(i));
-            if(i == players.length*2) {
-                //calculate odds
+            if(deck.getTotalDelt() == players.length*2) {
+                calculateOdds();
             }
 
         } else {
@@ -232,7 +245,7 @@ public class PokerGUI {
             i = i - (players.length*2);
             flopCards[i-1].setText("<html><body style=\"font-size:40px\">" + deck.getCommunityCard(i-1) + "</body></html>");
             if(calcOdds) {
-
+                calculateOdds();
             }
         }
         frame.revalidate();
@@ -240,7 +253,7 @@ public class PokerGUI {
     }
 
 
-    private static void getPlayerNames(JFrame orgFrame, JPanel orgPanel, JButton refresh) {
+    private void getPlayerNames(JFrame orgFrame, JPanel orgPanel, JButton refresh) {
         JTextField[] names = new JTextField[8];
         orgFrame.remove(orgPanel);
         orgFrame.setLocationRelativeTo(null);
@@ -316,7 +329,7 @@ public class PokerGUI {
 
 
 
-    private static void newGame() {
+    private void newGame() {
         handNum = new int[players.length];
         for(int i = 0; i < handNum.length; i++) {
             handNum[i] = i;
@@ -325,7 +338,7 @@ public class PokerGUI {
 
 
 
-    private static void foldPlayer(int p) {
+    private void foldPlayer(int p) {
         handNum[p] = -1;
         for (int i = p + 1; i < handNum.length; i++) {
             if(handNum[i] > -1) {
@@ -334,20 +347,29 @@ public class PokerGUI {
         }
     }
 
-    private static String getHandDetails(int plnum) {
+    private String getHandDetails(int plnum) {
         return "<html><body style=\"text-align:center;font-size:40px\">" + players[plnum] + "<br> " + deck.getPlayerCards(plnum) + " | -.-%<body></html>";
     }
 
-    private static String getHandOdds(int plnum) {
-        //return "<html><body style=\"text-align:center;font-size:40px\">" + players[plnum] + "<br> " + deck.getPlayerCards(plnum) + " | " + deck. +"%<body></html>";
-        return "ss";
+    private void calculateOdds() {
+        double[] odds = deck.PercentageWins();
+        for(int i = 0; i < players.length; i++) {
+            if(handNum[i] >= 0) {
+                String text = playerLabels[i].getText();
+                text = text.substring(0, text.indexOf("|") + 2);
+                text = text + String.format("%.1f", odds[handNum[i]]) + "%<body></html>";
+                playerLabels[i].setText(text);
+                frame.revalidate();
+                frame.repaint();
+            }
+        }
     }
 
     private void resetHands() {
 
     }
 
-    private static void setUpHashMap() {
+    private void setUpHashMap() {
         dealmap.put("as", 0);
         dealmap.put("ks", 1);
         dealmap.put("qs", 5);
@@ -403,5 +425,39 @@ public class PokerGUI {
         dealmap.put("4d", 119800013);
         dealmap.put("3d", 120174009);
         dealmap.put("2d", 121016845);
+    }
+
+
+    @Override
+    public void keyTyped(KeyEvent e) {
+
+    }
+
+    @Override
+    public void keyPressed(KeyEvent e) {
+        int code = e.getKeyCode() - KeyEvent.VK_0 - 1;
+        if(code < 0 || code > 7) {
+            return;
+        }
+        if(players == null) {
+            return;
+        }
+        if(players.length > code) {
+            deck.fold(handNum[code]);
+            foldPlayer(code);
+
+            playerPanel.remove(playerLabels[code]);
+            playerPanel.setLayout(new GridLayout(deck.remainingPlayers(),1));
+            ((GridLayout)playerPanel.getLayout()).setVgap(15);
+
+            playerPanel.revalidate();
+            playerPanel.repaint();
+            frame.repaint();
+        }
+    }
+
+    @Override
+    public void keyReleased(KeyEvent e) {
+
     }
 }

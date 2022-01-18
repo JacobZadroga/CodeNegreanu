@@ -28,56 +28,12 @@ public class DeckTest {
 //        System.out.println("Milliseconds: " + (end-start));
 //        d.fold(1);
 //        d.PercentageWins();
-          HandRank hr = new HandRank();
-          int i = hr.straightFlushStrength(new int[] {
-                  0b111000101, 1
-          }, new int[] {
-                  0b10100011011001101, 0b11111101111, 0b101, 0b10110, 0b1100010
-          }, 0);
-          System.out.println(i);
-
-    }
-
-    public static void mergeSort(int[] lst, int n) {
-        if(n <= 1) {
-            return;
-        }
-        int middle = n/2;
-        int[] low = new int[middle];
-        int[] high = new int[n - (middle)];
-        for(int i = 0; i < middle; i++) {
-            low[i] = lst[i];
-        }
-        for(int i = middle; i < n; i++) {
-            high[i-middle] = lst[i];
-        }
-        mergeSort(low, low.length);
-        mergeSort(high, high.length);
-
-        merge(lst, low, high);
-    }
-
-    public static void merge(int[] lst, int[] low, int[] high) {
-        int i = 0, j = 0, k = 0;
-        while(j < low.length && k < high.length) {
-            if(low[j] <= high[k]) {
-                lst[i] = low[j];
-                i++;
-                j++;
-            } else {
-                lst[i] = high[k];
-                k++;
-                i++;
-            }
-        }
-        while(j < low.length) {
-            lst[i] = low[j];
-            i++;
-            j++;
-        } while(k < high.length) {
-            lst[i] = high[k];
-            k++;
-            i++;
-        }
+//        HandRank hr = new HandRank();
+//          int i = hr.flushStrength(new int[] {
+//                  0b10100011011001101, 0b11111101111
+//          }, new int[] {
+//                  0, 1, 0b101, 0b10110, 0b1100010
+//          }, 0,0);
+            PokerGUI gui = new PokerGUI();
     }
 }

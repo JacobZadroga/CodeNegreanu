@@ -35,33 +35,33 @@ public class HandRank {
 
 
             //System.out.println(str);
-            flushStengthHash.put(0, 113);
-            flushStengthHash.put(1, 112);
-            flushStengthHash.put(5, 111);
-            flushStengthHash.put(22, 110);
-            flushStengthHash.put(98, 109);
-            flushStengthHash.put(453, 108);
-            flushStengthHash.put(2031, 107);
-            flushStengthHash.put(8698, 106);
-            flushStengthHash.put(22854, 105);
-            flushStengthHash.put(83661, 104);
-            flushStengthHash.put(262349, 103);
-            flushStengthHash.put(636345, 102);
-            flushStengthHash.put(1479181, 101);
+            flushStengthHash.put(0, 333);
+            flushStengthHash.put(1, 334);
+            flushStengthHash.put(5, 335);
+            flushStengthHash.put(22, 336);
+            flushStengthHash.put(98, 337);
+            flushStengthHash.put(453, 338);
+            flushStengthHash.put(2031, 339);
+            flushStengthHash.put(8698, 340);
+            flushStengthHash.put(22854, 341);
+            flushStengthHash.put(83661, 342);
+            flushStengthHash.put(262349, 343);
+            flushStengthHash.put(636345, 344);
+            flushStengthHash.put(1479181, 345);
 
-            straightflushStengthHash.put(0, 213);
-            straightflushStengthHash.put(1, 212);
-            straightflushStengthHash.put(5, 211);
-            straightflushStengthHash.put(22, 210);
-            straightflushStengthHash.put(98, 209);
-            straightflushStengthHash.put(453, 208);
-            straightflushStengthHash.put(2031, 207);
-            straightflushStengthHash.put(8698, 206);
-            straightflushStengthHash.put(22854, 205);
-            straightflushStengthHash.put(83661, 204);
-            straightflushStengthHash.put(262349, 203);
-            straightflushStengthHash.put(636345, 202);
-            straightflushStengthHash.put(1479181, 201);
+            straightflushStengthHash.put(0, 1);
+            straightflushStengthHash.put(1, 2);
+            straightflushStengthHash.put(5, 3);
+            straightflushStengthHash.put(22, 4);
+            straightflushStengthHash.put(98, 5);
+            straightflushStengthHash.put(453, 6);
+            straightflushStengthHash.put(2031, 7);
+            straightflushStengthHash.put(8698, 8);
+            straightflushStengthHash.put(22854, 9);
+            straightflushStengthHash.put(83661, 10);
+            straightflushStengthHash.put(262349, 11);
+            straightflushStengthHash.put(636345, 12);
+            straightflushStengthHash.put(1479181, 13);
         } catch(Exception e) {
 
         }
@@ -72,7 +72,7 @@ public class HandRank {
         //System.out.println("SIZE: " + possibleHands.size());
         double[] wins = new double[playerhands.size()];
         for(int[] com : possibleHands) {
-            int best = 0;
+            int best = 999999;
             int[] stren = new int[playerhands.size()];
             for(int i = 0; i < playerhands.size(); i++) {
                 //calculate strength
@@ -89,18 +89,21 @@ public class HandRank {
                 }
 
                 int flushStren = flushStrength(playerhands.get(i), com, sum, comsum);
-                int handStren = 0;
-                if(flushStren >= 0) {
+                int handStren = 4500;
+                if(flushStren > 0) {
                     if(handStren >= 6 && handStren <= 53) {
                         int k = straightFlushStrength(playerhands.get(i), com, flushStren>>16);
                         if(k != 0) {
                             stren[i] = k;
+                        } else {
+                            stren[i] = Math.min((flushStren&0xffff), handStren);
                         }
                     } else {
-                        stren[i] = Math.min(flushStren, handStren);
+                        stren[i] = Math.min((flushStren&0xffff), handStren);
                     }
+                } else {
+                    stren[i] = handStren;
                 }
-                stren[i] = handStren;
 
                 if(stren[i] < best) {
                     best = stren[i];
@@ -108,7 +111,7 @@ public class HandRank {
             }
 
             for(int i = 0; i < stren.length; i++) {
-                if(stren[i] == best && best > 0) {
+                if(stren[i] == best) {
                     wins[i]++;
                 }
             }
@@ -160,17 +163,18 @@ public class HandRank {
 
         int prev = straightflushStengthHash.get(cards[0]&2097151);
         for(int i = 0; i < cards.length; i++) {
-            if((straightflushStengthHash.get(cards[i]&2097151) == prev-1 || inarow == 0) && cards[i] >> 21 == flushtype) {
+            int thiscard = cards[i]&2097151;
+            if((straightflushStengthHash.get(thiscard) == prev+1 || inarow == 0) && cards[i] >> 21 == flushtype) {
                 inarow++;
             } else if(inarow >= 5) {
                 break;
             } else {
                 inarow = 1;
             }
-            prev = straightflushStengthHash.get(cards[i]&2097151);
+            prev = straightflushStengthHash.get(thiscard);
         }
         if(inarow >= 5) {
-            return prev+(inarow-1);
+            return prev-(inarow-1);
         } else {
             return 0;
         }

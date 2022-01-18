@@ -345,6 +345,7 @@ public class PokerGUI implements KeyListener {
                 handNum[i] = handNum[i] - 1;
             }
         }
+        calculateOdds();
     }
 
     private String getHandDetails(int plnum) {
@@ -352,12 +353,13 @@ public class PokerGUI implements KeyListener {
     }
 
     private void calculateOdds() {
+        if(deck.getTotalDelt() < 2*players.length) return;
         double[] odds = deck.PercentageWins();
         for(int i = 0; i < players.length; i++) {
             if(handNum[i] >= 0) {
                 String text = playerLabels[i].getText();
                 text = text.substring(0, text.indexOf("|") + 2);
-                text = text + String.format("%.1f", odds[handNum[i]]) + "%<body></html>";
+                text = text + String.format("%.2f", odds[handNum[i]]) + "%<body></html>";
                 playerLabels[i].setText(text);
                 frame.revalidate();
                 frame.repaint();

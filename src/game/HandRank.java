@@ -32,7 +32,20 @@ public class HandRank {
                 String[] keyPair = ln.split(",");
                 flushHash.put((Integer) Integer.parseInt(keyPair[0]), (Integer) Integer.parseInt(keyPair[1]));
             }
+            fp.close();
+            fp = new FileReader("handrank.txt");
+            str = "";
+            line = new char[20];
+            while((rcv = fp.read(line)) == 20) {
+                str += new String(line);
+            }
+            str+= new String(line).substring(0, rcv);
 
+            for(String ln : str.split("\n")) {
+                String[] keyPair = ln.split(",");
+                handHash.put((Integer) Integer.parseInt(keyPair[0]), (Integer) Integer.parseInt(keyPair[1].strip()));
+            }
+            fp.close();
 
             //System.out.println(str);
             flushStengthHash.put(0, 333);
@@ -63,7 +76,7 @@ public class HandRank {
             straightflushStengthHash.put(636345, 12);
             straightflushStengthHash.put(1479181, 13);
         } catch(Exception e) {
-
+            System.out.println("Something went wrong!");
         }
     }
 
@@ -72,7 +85,7 @@ public class HandRank {
         //System.out.println("SIZE: " + possibleHands.size());
         double[] wins = new double[playerhands.size()];
         for(int[] com : possibleHands) {
-            int best = 999999;
+            int best = 4000;
             int[] stren = new int[playerhands.size()];
             for(int i = 0; i < playerhands.size(); i++) {
                 //calculate strength
@@ -89,9 +102,9 @@ public class HandRank {
                 }
 
                 int flushStren = flushStrength(playerhands.get(i), com, sum, comsum);
-                int handStren = 4500;
+                int handStren = handHash.get(valsum);
                 if(flushStren > 0) {
-                    if(handStren >= 6 && handStren <= 53) {
+                    if(handStren >= 347 && handStren <= 355) {
                         int k = straightFlushStrength(playerhands.get(i), com, flushStren>>16);
                         if(k != 0) {
                             stren[i] = k;

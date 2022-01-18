@@ -359,7 +359,7 @@ public class PokerGUI implements KeyListener {
             if(handNum[i] >= 0) {
                 String text = playerLabels[i].getText();
                 text = text.substring(0, text.indexOf("|") + 2);
-                text = text + String.format("%.2f", odds[handNum[i]]) + "%<body></html>";
+                text = text + String.format("%.2f", odds[handNum[i]]) + "% | " + String.format("%.2f", odds[handNum[i]+deck.remainingPlayers()]) +  "%<body></html>";
                 playerLabels[i].setText(text);
                 frame.revalidate();
                 frame.repaint();

@@ -82,12 +82,16 @@ public class HandRank {
 
 
     public double[] getPercentageWin(ArrayList<int[]> possibleHands, List<int[]> playerhands) {
+        int size = playerhands.size();
         //System.out.println("SIZE: " + possibleHands.size());
-        double[] wins = new double[playerhands.size()];
+        double[] wins = new double[size*2];
+        for(int i = 0; i<wins.length;i++) {
+            wins[i]=0;
+        }
         for(int[] com : possibleHands) {
             int best = 4000;
-            int[] stren = new int[playerhands.size()];
-            for(int i = 0; i < playerhands.size(); i++) {
+            int[] stren = new int[size];
+            for(int i = 0; i < size; i++) {
                 //calculate strength
                 int sum = 0, comsum = 0, valsum = 0;
                 for(int k : playerhands.get(i)) {
@@ -122,15 +126,25 @@ public class HandRank {
                     best = stren[i];
                 }
             }
-
+            int tie = -1;
             for(int i = 0; i < stren.length; i++) {
                 if(stren[i] == best) {
-                    wins[i]++;
+                    if(tie == -1) {
+                        wins[i]++;
+                        tie = i;
+                    } else if(tie == -2) {
+                        wins[i+size]++;
+                    } else {
+                        wins[i+size]++;
+                        wins[tie]--;
+                        wins[tie+size]++;
+                        tie = -2;
+                    }
                 }
             }
 
         }
-        for(int win = 0; win < playerhands.size(); win++) {
+        for(int win = 0; win < size*2; win++) {
              //percent[win] = wins[win];
              wins[win] = (wins[win] / (double)possibleHands.size()) * 100;
         }

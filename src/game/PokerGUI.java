@@ -128,6 +128,7 @@ public class PokerGUI implements KeyListener {
                     flopCards[i].setText("<html><body style=\"font-size:40px\">" + deck.getCommunityCard(i) + "</body></html>");
                 }
                 newGame();
+                //test
                 frame.repaint();
                 frame.revalidate();
             }

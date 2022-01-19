@@ -20,6 +20,7 @@ public class PokerGUI implements KeyListener {
     private JPanel playerPanel;
     private JLabel[] playerLabels;
     private JLabel[] flopCards;
+    private JButton newGameRefresh;
 
 
     public PokerGUI() {
@@ -52,7 +53,7 @@ public class PokerGUI implements KeyListener {
         JButton startNewGame = new JButton("New Game");
         startNewGame.setFont(font);
         startNewGame.setFocusable(false);
-        JButton newGameRefresh = new JButton("Refresh");
+        newGameRefresh = new JButton("Refresh");
         newGameRefresh.setFont(font);
         newGameRefresh.setFocusable(false);
         JButton foldBtn = new JButton("Fold Player");
@@ -231,7 +232,7 @@ public class PokerGUI implements KeyListener {
         frame.revalidate();
     }
 
-    private void rcvDealCard(int c, JButton newGameRefresh) {
+    public void rcvDealCard(int c) {
         int dealt = deck.dealNextCard(c);
         if(dealt == 1) {
             dealCards(playerLabels, flopCards, frame);

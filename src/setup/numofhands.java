@@ -36,7 +36,7 @@ public class numofhands {
         010011011010110111001
         101101001001000001101
      */
-    public static void main(String[] args) {
+    public static void pain(String[] args) {
         //System.out.println("Test");
         //0,1,5,22,98,453,2031,8698,22854,83661,262349,636345,1479181
         int[] curDigits = {

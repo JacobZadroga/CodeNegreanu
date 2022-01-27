@@ -1,5 +1,7 @@
 package game;
 
+import javax.swing.*;
+import java.io.File;
 import java.io.FileReader;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -18,8 +20,10 @@ public class HandRank {
 
     private void loadFlushHand() {
         try {
-
-            FileReader fp = new FileReader("/Users/jacobzadroga/flushrank.txt");
+            String path = DeckTest.class.getProtectionDomain().getCodeSource().getLocation().getPath();
+            path = path.substring(0, path.length()-16);
+            //System.out.println(path);
+            FileReader fp = new FileReader(path + "flushrank.txt");
             String str = "";
             char[] line = new char[20];
             int rcv;
@@ -33,7 +37,7 @@ public class HandRank {
                 flushHash.put((Integer) Integer.parseInt(keyPair[0]), (Integer) Integer.parseInt(keyPair[1]));
             }
             fp.close();
-            fp = new FileReader("/Users/jacobzadroga/handrank.txt");
+            fp = new FileReader(path + "handrank.txt");
             str = "";
             line = new char[20];
             while((rcv = fp.read(line)) == 20) {
@@ -76,7 +80,7 @@ public class HandRank {
             straightflushStengthHash.put(636345, 12);
             straightflushStengthHash.put(1479181, 13);
         } catch(Exception e) {
-            System.out.println("Something went wrong!");
+            JOptionPane.showConfirmDialog(null, e.toString(), "Hand Rank Error", JOptionPane.PLAIN_MESSAGE);
         }
     }
 

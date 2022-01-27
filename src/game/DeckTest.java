@@ -1,17 +1,15 @@
 package game;
 
-import java.io.BufferedInputStream;
-import java.io.DataInputStream;
-import java.io.IOException;
-import java.net.Socket;
-import java.nio.Buffer;
+import setup.SMS;
 
 public class DeckTest {
     public static void main(String[] args) throws InterruptedException {
-            PokerGUI gui = new PokerGUI();
-            //SocketThread st = new SocketThread();
-            //st.start();
-            //st.join();
+            //PokerGUI gui = new PokerGUI();
+            SMS rcv = new SMS("ACa7ad87fbe587d685e63a0994ed64b02c", "316809d6338b6497193142969d38c3ea");
+            //rcv.sendMessage("Welcome");
+//            SocketThread st = new SocketThread(gui);
+//            st.start();
+//            st.join();
 
     }
 }

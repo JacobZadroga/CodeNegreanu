@@ -3,14 +3,12 @@ package game;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
+import java.awt.event.*;
 import java.util.HashMap;
 
 public class PokerGUI implements KeyListener {
     private String[] players;
+    private String[] phones;
     private int[] handNum;
     private final Deck deck = new Deck();
     private final Font font = new Font(Font.SANS_SERIF, Font.BOLD, 24);
@@ -21,6 +19,7 @@ public class PokerGUI implements KeyListener {
     private JLabel[] playerLabels;
     private JLabel[] flopCards;
     private JButton newGameRefresh;
+    private boolean killServer = false;
 
 
     public PokerGUI() {
@@ -94,8 +93,6 @@ public class PokerGUI implements KeyListener {
 
 
 
-
-
         startNewGame.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -110,6 +107,15 @@ public class PokerGUI implements KeyListener {
         newGameRefresh.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
+
+                String firstname = players[0];
+                String firstphone = phones[0];
+                for(int i = 1; i < players.length; i++) {
+                    players[i-1] = players[i];
+                    phones[i-1] = phones[i];
+                }
+                players[players.length-1] = firstname;
+                phones[players.length-1] = firstphone;
 
                 int notFolded = players.length;
                 deck.newDeal(notFolded);
@@ -187,11 +193,6 @@ public class PokerGUI implements KeyListener {
                                 JOptionPane.showConfirmDialog(null, "Card Already Dealt", "Invalid", JOptionPane.PLAIN_MESSAGE);
                                 break;
                             } else {
-                                 String firstname = players[0];
-                                 for(int i = 1; i < players.length; i++) {
-                                        players[i-1] = players[i];
-                                 }
-                                 players[players.length-1] = firstname;
                                  newGameRefresh.doClick();
                                  dealt = deck.dealNextCard(dealmap.get(c));
                                  dealCards(playerLabels, flopCards, frame);
@@ -210,11 +211,6 @@ public class PokerGUI implements KeyListener {
                         } else if(dealt == -1) {
                             JOptionPane.showConfirmDialog(null, "Card Already Dealt", "Invalid", JOptionPane.PLAIN_MESSAGE);
                         } else {
-                            String firstname = players[0];
-                            for(int i = 1; i < players.length; i++) {
-                                players[i-1] = players[i];
-                            }
-                            players[players.length-1] = firstname;
                             newGameRefresh.doClick();
                             dealt = deck.dealNextCard(dealmap.get(card));
                             dealCards(playerLabels, flopCards, frame);
@@ -227,6 +223,13 @@ public class PokerGUI implements KeyListener {
             }
         });
 
+        frame.addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowClosing(WindowEvent e) {
+                //System.out.println("closed window");
+                killServer = true;
+            }
+        });
         frame.addKeyListener(this);
         frame.setFocusable(true);
         frame.add(jp);
@@ -234,22 +237,8 @@ public class PokerGUI implements KeyListener {
         frame.revalidate();
     }
 
-    public void rcvDealCard(int c) {
-        int dealt = deck.dealNextCard(c);
-        if(dealt == 1) {
-            dealCards(playerLabels, flopCards, frame);
-        } else if(dealt == -1) {
-            JOptionPane.showConfirmDialog(null, "Card Already Dealt", "Invalid", JOptionPane.PLAIN_MESSAGE);
-        } else {
-            String firstname = players[0];
-            for(int i = 1; i < players.length; i++) {
-                players[i-1] = players[i];
-            }
-            players[players.length-1] = firstname;
-            newGameRefresh.doClick();
-            dealt = deck.dealNextCard(c);
-            dealCards(playerLabels, flopCards, frame);
-        }
+    public boolean getKillServer() {
+        return killServer;
     }
 
     private void dealCards(JLabel[] playerLabels, JLabel[] flopCards, JFrame frame) {
@@ -274,6 +263,69 @@ public class PokerGUI implements KeyListener {
         frame.repaint();
     }
 
+    public void updateCommunityCards() {
+        for(int i = 0; i<5; i++) {
+            flopCards[i].setText("<html><body style=\"font-size:40px\">" + deck.getCommunityCard(i) + "</body></html>");
+        }
+    }
+
+    public void rcvHand(String[] strCards, String number) {
+        boolean success = false;
+        int[] cards = new int[strCards.length];
+        for(int i = 0; i < strCards.length; i++) {
+            cards[i] = dealmap.get(strCards[i].toLowerCase());
+        }
+        if(deck.getTotalDelt() >= (2 * players.length) + 5) {
+            System.out.println("New game");
+            newGameRefresh.doClick();
+        }
+        if(cards.length == 2) {
+            if(deck.getTotalDelt() >= (2 * players.length)) {
+                System.out.println("Incorrect Deal, Player hand post flop.");
+            } else {
+                boolean found = false;
+                for(int i = 0; i < players.length; i++) {
+                    //System.out.println(phones[i] + " | tF " + number);
+                    if(phones[i].equals(number)) {
+                        success = deck.dealFromText(cards, i);
+                        playerLabels[i].setText(getHandDetails(i));
+                        found = true;
+                        break;
+                    }
+                }
+                if(!found) {
+                    System.out.println("Phone not found.");
+                }
+                if(deck.getTotalDelt() == (2 * players.length)) {
+                    calculateOdds();
+                }
+            }
+            return;
+        } else if(cards.length == 3) {
+            if(deck.getTotalDelt() != (2 * players.length)) {
+                System.out.println("Incorrect Deal, Flop in wrong spot.");
+            } else {
+                success = deck.dealFromText(cards, -1);
+                updateCommunityCards();
+                calculateOdds();
+            }
+            return;
+        } else if(cards.length == 1) {
+            if(deck.getTotalDelt() < (2 * players.length) + 3) {
+                System.out.println("Incorrect Deal, Turn/River in wrong spot.");
+            } else {
+                success = deck.dealFromText(cards,-1);
+                calculateOdds();
+            }
+            return;
+        } else {
+            System.out.println("Error!");
+        }
+        if(!success) {
+            System.out.println("Deal Failed.");
+        }
+        //System.out.println("Phone number not found.");
+    }
 
     private void getPlayerNames(JFrame orgFrame, JPanel orgPanel, JButton refresh) {
         JTextField[] names = new JTextField[8];
@@ -302,8 +354,11 @@ public class PokerGUI implements KeyListener {
                 if(confirm == 0) {
                     int totalnames = Integer.parseInt((String) combo.getSelectedItem());
                     players = new String[totalnames];
+                    phones = new String[totalnames];
                     for(int i = 0; i < totalnames; i++) {
-                        players[i] = names[i].getText();
+                        players[i] = names[i].getText().split(" ")[0].strip();
+                        phones[i] = names[i].getText().split(" ")[1].strip();
+                        //System.out.println(i + " " + phones[i]);
                     }
                     newGame();
                     orgFrame.remove(panel);
@@ -350,14 +405,12 @@ public class PokerGUI implements KeyListener {
     }
 
 
-
     private void newGame() {
         handNum = new int[players.length];
         for(int i = 0; i < handNum.length; i++) {
             handNum[i] = i;
         }
     }
-
 
 
     private void foldPlayer(int p) {
@@ -370,9 +423,11 @@ public class PokerGUI implements KeyListener {
         calculateOdds();
     }
 
+
     private String getHandDetails(int plnum) {
         return "<html><body style=\"text-align:center;font-size:40px\">" + players[plnum] + "<br> " + deck.getPlayerCards(plnum) + " | -.-%<body></html>";
     }
+
 
     private void calculateOdds() {
         if(deck.getTotalDelt() < 2*players.length) return;
@@ -389,9 +444,7 @@ public class PokerGUI implements KeyListener {
         }
     }
 
-    private void resetHands() {
 
-    }
 
     private void setUpHashMap() {
         dealmap.put("as", 0);

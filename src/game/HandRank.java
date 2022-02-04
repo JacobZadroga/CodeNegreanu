@@ -1,7 +1,6 @@
 package game;
 
 import javax.swing.*;
-import java.io.File;
 import java.io.FileReader;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -20,7 +19,7 @@ public class HandRank {
 
     private void loadFlushHand() {
         try {
-            String path = DeckTest.class.getProtectionDomain().getCodeSource().getLocation().getPath();
+            String path = Main.class.getProtectionDomain().getCodeSource().getLocation().getPath();
             path = path.substring(0, path.length()-16);
             //System.out.println(path);
             FileReader fp = new FileReader(path + "flushrank.txt");

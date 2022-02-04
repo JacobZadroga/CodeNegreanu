@@ -1,20 +1,21 @@
-package setup;
-
-import game.PokerGUI;
+package game;
 
 import javax.swing.*;
 import java.io.*;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
+import java.util.Locale;
 import java.util.concurrent.Semaphore;
 
-public class SocketThread extends Thread {
+public class rcvMessage extends Thread {
     Socket socket;
     Semaphore flag;
+    PokerGUI game;
 
-    public SocketThread(Socket s, Semaphore f) {
+    public rcvMessage(Socket s, Semaphore f, PokerGUI g) {
         socket = s;
         this.flag = f;
+        game = g;
     }
 
     public void run() {
@@ -40,13 +41,18 @@ public class SocketThread extends Thread {
             try {
                 String[] vals = stringSplitter(line);
                 if(!vals[0].equals("ERROR") && !vals[1].equals("ERROR")) {
-                    System.out.println("do something");
+                    String[] cards = vals[0].split(" ");
+                    System.out.println("Received: " + vals[0] + " from " + vals[1]);
+                    flag.acquire();
+
+                    game.rcvHand(cards, vals[1]);
+
+                    flag.release();
                 } else {
-                    new Thread(new PostThread("Invalid Card.", vals[1])).start();
                     System.out.println("Invalid Card Received By " + vals[1]);
                 }
             } catch (Exception e) {
-                System.out.println("Invalid Card Conneciton.");
+                System.out.println("Invalid Card Connection." + e.toString());
             }
             //System.out.println(line.substring(0, line.indexOf("HTTP/")));
             String httpResponse = "HTTP/1.1 200 OK\r\n\r\n" + "<html><body>Working.</body></html>";
@@ -56,6 +62,8 @@ public class SocketThread extends Thread {
         } catch(Exception e) {
             JOptionPane.showConfirmDialog(null, e.toString(), "Error!", JOptionPane.PLAIN_MESSAGE);
         }
+
+
         try {
             socket.close();
         } catch(Exception e) {
@@ -72,21 +80,16 @@ public class SocketThread extends Thread {
         //System.out.println("body: " + body + " | from: " + from);
         String[] set = new String[2];
 
-        if(body.length() == 5 && isLegal(body))
-        {
+        if(isLegal(body)) {
             set[0] = body;
-        }
-        else
-        {
+        } else {
+            //System.out.println("islegal error");
             set[0] = "ERROR";
         }
 
-        if(from.length() == 10)
-        {
+        if(from.length() == 10) {
             set[1] = from;
-        }
-        else
-        {
+        } else {
             set[1] = "ERROR";
         }
 
@@ -96,38 +99,20 @@ public class SocketThread extends Thread {
     private boolean isLegal(String input)
     {
         input = input.toUpperCase();
+        String[] cards = input.split(" ");
 
-        if(input.charAt(0) == input.charAt(3) && input.charAt(1) == input.charAt(4))
-        {
-            return false;
-        }
+        for(String card : cards) {
+            if(card.length() != 2) return false;
 
-        for(int i = 0; i < input.length(); i++)
-        {
-
-            if(i == 0 || i == 3)
-            {
-                char c = input.charAt(i);
-                if((c < 50 || c > 57) && c != 74 && c != 81 && c != 75 && c != 65) {
-                    return false;
-                }
+            char c = card.charAt(0);
+            if((c < 50 || c > 57) && c != 74 && c != 81 && c != 75 && c != 65 && c != 84) {
+                return false;
             }
-            else if(i == 1 || i == 4)
-            {
-                char c = input.charAt(i);
-                if(c != 67 && c != 68 && c != 72 && c != 83) {
-                    return false;
-                }
-            }
-            else
-            {
-                if(input.charAt(i) != 32)
-                {
-                    return false;
-                }
+            c = card.charAt(1);
+            if(c != 67 && c != 68 && c != 72 && c != 83) {
+                return false;
             }
         }
-
         return true;
     }
 

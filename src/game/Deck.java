@@ -181,13 +181,40 @@ public class Deck {
         totalDelt = 0;
         playerhands = new ArrayList<int[]>();
         for(int i = 0; i < playersIn; i++) {
-            playerhands.add(new int[4]);
+            playerhands.add(new int[2]);
             playerhands.get(i)[0] = -1;
             playerhands.get(i)[1] = -1;
         }
         for(int i = 0; i < 5; i++) {
             communityCards[i] = -1;
         }
+    }
+
+    public boolean dealFromText(int[] cards, int playerNumber) {
+        for(int c : cards) {
+            if(!curdeck.contains(c)) {
+                return false;
+            }
+        }
+        if(cards.length == 3 || cards.length == 1) {
+            if(totalDelt < (2 * playersIn)) {
+                return false;
+            }
+            for(int c : cards) {
+                int comNum = totalDelt - (2 * playersIn);
+                communityCards[comNum] = c;
+                curdeck.remove((Integer) c);
+                totalDelt++;
+            }
+        } else {
+            playerhands.get(playerNumber)[0] = cards[0];
+            playerhands.get(playerNumber)[1] = cards[1];
+            curdeck.remove((Integer) cards[0]);
+            curdeck.remove((Integer) cards[1]);
+            totalDelt += 2;
+
+        }
+        return true;
     }
 
     public int dealNextCard(int card) {
@@ -231,6 +258,8 @@ public class Deck {
         }
     }
 
+
+    //method tells you how many combinations of toPick cards you can select from total cards (order doesn't matter)
     public int totalPos(int toPick, int totalCards) {
         if(totalCards-toPick == 0) {
             return 1;
@@ -240,6 +269,7 @@ public class Deck {
             return totalPos(toPick-1, totalCards-1) + totalPos(toPick, totalCards-1);
         }
     }
+
 
     public void fold(int playerNum) {
         playerhands.remove(playerNum);
@@ -259,23 +289,5 @@ public class Deck {
     public int getTotalDelt() {
         return totalDelt;
     }
-
-
-    //write possible hands depr method
-        /*public void writePossibleHands() {
-        try {
-            FileWriter fw = new FileWriter("pothands.txt");
-            int remCards = 5 - (totalDelt - (2 * playerhands.length));
-            possibleCards(remCards, 0, communityCards);
-            for(int i = 0; i < possibleHands.size(); i++) {
-                int[] hand = possibleHands.get(i);
-                fw.write(getCardDetails(hand[0]) + " | " + getCardDetails(hand[1]) + " | " + getCardDetails(hand[2])
-                        + " | " + getCardDetails(hand[3]) + " | " + getCardDetails(hand[4]) + "\n");
-            }
-            fw.close();
-        } catch(Exception e) {
-            System.out.println("File Not Opened.");
-        }
-    }*/
 
 }

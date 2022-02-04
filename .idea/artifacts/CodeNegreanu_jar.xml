@@ -1,8 +1,9 @@
 <component name="ArtifactManager">
   <artifact type="jar" build-on-make="true" name="CodeNegreanu:jar">
-    <output-path>$PROJECT_DIR$</output-path>
+    <output-path>$USER_HOME$/Desktop/CodeNegreanu</output-path>
     <root id="archive" name="CodeNegreanu.jar">
       <element id="module-output" name="CodeNegreanu" />
+      <element id="library" level="project" name="twilio-8.9.0-jar-with-dependencies" />
     </root>
   </artifact>
 </component>

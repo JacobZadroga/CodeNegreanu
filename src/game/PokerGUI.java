@@ -431,7 +431,9 @@ public class PokerGUI implements KeyListener {
 
     private void calculateOdds() {
         if(deck.getTotalDelt() < 2*players.length) return;
+        long start = System.currentTimeMillis();
         double[] odds = deck.PercentageWins();
+        System.out.println("Time: " + (System.currentTimeMillis()-start));
         for(int i = 0; i < players.length; i++) {
             if(handNum[i] >= 0) {
                 String text = playerLabels[i].getText();

@@ -5,6 +5,7 @@ import java.io.FileReader;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.concurrent.Semaphore;
 
 public class HandRank {
     HashMap<Integer, Integer> flushHash = new HashMap<Integer, Integer>();
@@ -33,7 +34,7 @@ public class HandRank {
 
             for(String ln : str.split("\n")) {
                 String[] keyPair = ln.split(",");
-                flushHash.put((Integer) Integer.parseInt(keyPair[0]), (Integer) Integer.parseInt(keyPair[1]));
+                flushHash.put(Integer.parseInt(keyPair[0]), Integer.parseInt(keyPair[1]));
             }
             fp.close();
             fp = new FileReader(path + "handrank.txt");
@@ -83,15 +84,37 @@ public class HandRank {
         }
     }
 
+    public int[][] range(int total, int numofthreads) {
+        int[][] ranges = new int[numofthreads][2];
+        int plusones = total % numofthreads;
+        int div = total / numofthreads;
+        int start = 0;
+        for(int i = 0; i < numofthreads; i++) {
+            if(start > total-1) {
+                ranges[i][0] = -1;
+                continue;
+            }
+            ranges[i][0] = start;
+            if(plusones > 0) {
+                start += div + 1;
+                plusones--;
+            } else {
+                start += div;
+            }
+            ranges[i][1] = start-1;
+        }
+        return ranges;
+    }
 
     public double[] getPercentageWin(ArrayList<int[]> possibleHands, List<int[]> playerhands) {
         int size = playerhands.size();
         //System.out.println("SIZE: " + possibleHands.size());
+
         double[] wins = new double[size*2];
         for(int i = 0; i<wins.length;i++) {
             wins[i]=0;
         }
-        for(int[] com : possibleHands) {
+        for(int l = 0; l < possibleHands.size(); l++) {
             int best = 4000;
             int[] stren = new int[size];
             for(int i = 0; i < size; i++) {
@@ -101,18 +124,18 @@ public class HandRank {
                     sum += (k >> 21);
                     valsum += k&2097151;
                 }
-                for(int k : com) {
+                for(int k : possibleHands.get(l)) {
                     int g = (k >> 21);
                     comsum += g;
                     sum += g;
                     valsum += k & 2097151;
                 }
 
-                int flushStren = flushStrength(playerhands.get(i), com, sum, comsum);
+                int flushStren = flushStrength(playerhands.get(i), possibleHands.get(l), sum, comsum);
                 int handStren = handHash.get(valsum);
                 if(flushStren > 0) {
                     if(handStren >= 347 && handStren <= 355) {
-                        int k = straightFlushStrength(playerhands.get(i), com, flushStren>>16);
+                        int k = straightFlushStrength(playerhands.get(i), possibleHands.get(l), flushStren>>16);
                         if(k != 0) {
                             stren[i] = k;
                         } else {
@@ -150,6 +173,116 @@ public class HandRank {
         for(int win = 0; win < size*2; win++) {
              //percent[win] = wins[win];
              wins[win] = (wins[win] / (double)possibleHands.size()) * 100;
+        }
+        return wins;
+    }
+
+    public double[] getPercentageWinThreaded(ArrayList<int[]> possibleHands, List<int[]> playerhands) {
+        int size = playerhands.size();
+        //System.out.println("SIZE: " + possibleHands.size());
+
+        Thread[] threads = new Thread[4];
+        int[][] ranges = range(possibleHands.size(), threads.length);
+
+        double[] wins = new double[size*2];
+        for(int i = 0; i<wins.length;i++) {
+            wins[i]=0;
+        }
+
+        final Semaphore flg = new Semaphore(1);
+        for(int j = 0; j < threads.length; j++) {
+            final int start = ranges[j][0];
+            final int end = ranges[j][1];
+            threads[j] = new Thread() {
+                public void run() {
+                    int s = start;
+                    int e = end;
+                    double[] winsT = new double[size*2];
+                    Semaphore flag = flg;
+                    //System.out.println("Start Thread " + System.currentTimeMillis());
+                    for(int l = start; l <= end; l++) {
+                        int best = 4000;
+                        int[] stren = new int[size];
+                        for(int i = 0; i < size; i++) {
+                            //calculate strength
+                            int sum = 0, comsum = 0, valsum = 0;
+                            for(int k : playerhands.get(i)) {
+                                sum += (k >> 21);
+                                valsum += k&2097151;
+                            }
+                            for(int k : possibleHands.get(l)) {
+                                int g = (k >> 21);
+                                comsum += g;
+                                sum += g;
+                                valsum += k & 2097151;
+                            }
+
+                            int flushStren = flushStrength(playerhands.get(i), possibleHands.get(l), sum, comsum);
+                            int handStren = handHash.get(valsum);
+                            if(flushStren > 0) {
+                                if(handStren >= 347 && handStren <= 355) {
+                                    int k = straightFlushStrength(playerhands.get(i), possibleHands.get(l), flushStren>>16);
+                                    if(k != 0) {
+                                        stren[i] = k;
+                                    } else {
+                                        stren[i] = Math.min((flushStren&0xffff), handStren);
+                                    }
+                                } else {
+                                    stren[i] = Math.min((flushStren&0xffff), handStren);
+                                }
+                            } else {
+                                stren[i] = handStren;
+                            }
+
+                            if(stren[i] < best) {
+                                best = stren[i];
+                            }
+                        }
+                        int tie = -1;
+                        for(int i = 0; i < stren.length; i++) {
+                            if(stren[i] == best) {
+                                if(tie == -1) {
+                                    winsT[i]++;
+                                    tie = i;
+                                } else if(tie == -2) {
+                                    winsT[i+size]++;
+                                } else {
+                                    winsT[i+size]++;
+                                    winsT[tie]--;
+                                    winsT[tie+size]++;
+                                    tie = -2;
+                                }
+                            }
+                        }
+                        //flag.release();
+
+                    }
+                    //System.out.println("End Thread " + System.currentTimeMillis());
+                    try {
+                        flag.acquire();
+                    } catch (Exception ex) {
+                        ex.printStackTrace();
+                    }
+                    for(int i = 0; i < wins.length; i++) {
+                        wins[i] += winsT[i];
+                    }
+                    flag.release();
+                }
+            };
+            threads[j].start();
+        }
+        for(int j = 0; j < threads.length; j++) {
+            try {
+                threads[j].join();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+
+
+        for(int win = 0; win < size*2; win++) {
+            //percent[win] = wins[win];
+            wins[win] = (wins[win] / (double)possibleHands.size()) * 100;
         }
         return wins;
     }
